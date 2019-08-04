@@ -16,13 +16,16 @@ DATABASES = {
     }
 }
 
-ROOT_URLCONF = "tests.urls"
+ROOT_URLCONF = "warewolf_api.urls"
 
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sites",
+    "quartet_masterdata",
+    "quartet_epcis",
     "warewolf_api",
+    "quartet_capture"
 ]
 
 SITE_ID = 1
@@ -31,3 +34,4 @@ if django.VERSION >= (1, 10):
     MIDDLEWARE = ()
 else:
     MIDDLEWARE_CLASSES = ()
+

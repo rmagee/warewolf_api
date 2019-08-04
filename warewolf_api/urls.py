@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import url
-from django.views.generic import TemplateView
+from warewolf_api import views
 
 from . import views
 
 urlpatterns = [
-    url(r'', TemplateView.as_view(template_name="base.html")),
+    url(r'^item-detail/(?P<barcode>[0-9a-zA-Z\W]{1,150})/$',
+        views.GetItemDetail.as_view(),
+        name='item-detail')
     ]

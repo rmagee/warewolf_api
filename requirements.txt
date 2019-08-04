@@ -1,2 +1,4 @@
-
-# Additional requirements go here
+EPCPyYes
+quartet_epcis
+quartet_masterdata
+django-model-utils

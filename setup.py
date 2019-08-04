@@ -56,16 +56,16 @@ setup(
         'warewolf_api',
     ],
     include_package_data=True,
-    install_requires=[],
+    install_requires=[
+        'django-model-utils'
+    ],
     license="GPLv3",
     zip_safe=False,
     keywords='warewolf_api',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Framework :: Django',
-        'Framework :: Django :: 1.8',
-        'Framework :: Django :: 1.9',
-        'Framework :: Django :: 1.10',
+        'Framework :: Django :: 2.0',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3',
         'Natural Language :: English',

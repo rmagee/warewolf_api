@@ -18,8 +18,5 @@ class TestWarewolf_api(TestCase):
     def setUp(self):
         pass
 
-    def test_something(self):
-        pass
-
     def tearDown(self):
         pass
