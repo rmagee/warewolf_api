@@ -1,4 +1,6 @@
 EPCPyYes
 quartet_epcis
 quartet_masterdata
+quartet_output
 django-model-utils
+factory_boy

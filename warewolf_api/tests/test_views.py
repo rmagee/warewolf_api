@@ -66,7 +66,7 @@ class TestWarewolf_api(TestCase):
         response = self.client.get(
             '{0}?0100777220112102212PWT46W49A'.format(url))
         self.assertEqual(response.status_code, 400)
-        self.assertIn('correlate', response.data['message'])
+        self.assertIn('Could not find', response.data['message'])
         print(response.data)
 
     def tearDown(self):

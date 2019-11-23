@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "quartet_masterdata",
     "quartet_epcis",
-    "warewolf_api",
+    "warewolf_api.apps.WarewolfApiConfig",
+    "quartet_output.apps.QuartetOutputConfig",
     "quartet_capture"
 ]
 
