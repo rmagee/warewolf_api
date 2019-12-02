@@ -3,6 +3,7 @@ from warewolf_api.models import Transaction
 from django.contrib.auth import get_user_model
 from EPCPyYes.core.v1_2 import CBV, events
 import factory
+from factory import BUILD_STRATEGY
 
 
 class LocationTypeFactory(factory.django.DjangoModelFactory):
@@ -16,6 +17,7 @@ class LocationTypeFactory(factory.django.DjangoModelFactory):
 class LocationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Location
+        django_get_or_create = ('GLN13', 'SGLN')
 
     GLN13 = '3055551234577'
     SGLN = 'urn:epc:id:sgln:305555.333333.0'
@@ -28,7 +30,6 @@ class LocationFactory(factory.django.DjangoModelFactory):
     latitude = '39.906098'
     longitude = '-75.165733'
     location_type = factory.SubFactory(LocationTypeFactory)
-
 
 class LocationFieldFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -61,6 +62,7 @@ class CompanyTypeFactory(factory.DjangoModelFactory):
 class CompanyFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Company
+        django_get_or_create = ('GLN13', 'SGLN')
 
     gs1_company_prefix = '234156'
     company_type = factory.SubFactory(CompanyTypeFactory)

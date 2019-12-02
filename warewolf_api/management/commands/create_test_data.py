@@ -30,12 +30,10 @@
 # Copyright 2018 SerialLab Corp.  All rights reserved.
 import os
 
-from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.utils.translation import gettext as _
 
 from quartet_output.parsing import BusinessEPCISParser
-from quartet_masterdata import models
 
 
 class Command(BaseCommand):
@@ -45,20 +43,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print('***************************************************')
-        # factories.CompanyFactory()
-        # factories.CompanyTypeFactory()
-        # factories.LocationFactory()
-        # factories.LocationTypeFactory()
-        # factories.LocationFieldFactory()
-        # factories.LocationIdentifierFactory()
-        print('**********************DELETING OLD MODELS*****************')
-
-        models.Location.objects.all().delete()
-        models.Company.objects.all().delete()
-        print('COUNT: %s' % models.Location.objects.all().count())
-        from warewolf_api.tests import factories
-        factories.TransactionFactory()
-
         try:
             self._parse_test_data()
         except Exception as e:

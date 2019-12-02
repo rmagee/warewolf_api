@@ -66,7 +66,7 @@ class Transaction(EPCISBusinessEvent):
         help_text=_("The default location that this transaction will "
                     "use as a ship-to-location."),
         on_delete=models.CASCADE,
-        null=True
+        null=True, blank=True
     )
     default_ship_from = models.ForeignKey(
         Location,
@@ -74,7 +74,7 @@ class Transaction(EPCISBusinessEvent):
         related_name='default_ship_from',
         help_text=_("The default ship from location."),
         on_delete=models.CASCADE,
-        null=True
+        null=True, blank=True
     )
     default_possessing_party = models.ForeignKey(
         Company,
@@ -82,7 +82,7 @@ class Transaction(EPCISBusinessEvent):
         related_name='default_possessing_party',
         help_text=_("The default possessing party if any."),
         on_delete=models.CASCADE,
-        null=True
+        null=True, blank=True
     )
     default_owning_party = models.ForeignKey(
         Company,
@@ -90,7 +90,7 @@ class Transaction(EPCISBusinessEvent):
         verbose_name=_("Owning Party"),
         help_text=_("The default owning party if any."),
         on_delete=models.CASCADE,
-        null=True
+        null=True, blank=True
     )
     users = models.ManyToManyField(get_user_model(),
                                    verbose_name=_("Users"),
@@ -135,7 +135,7 @@ class Transaction(EPCISBusinessEvent):
     )
     authentication_info = models.ForeignKey(
         'quartet_output.AuthenticationInfo',
-        null=True,
+        null=True, blank=True,
         on_delete=models.SET_NULL,
         verbose_name=_("Authentication Info"),
         help_text=_("The Authentication Info to use when sending transaction "

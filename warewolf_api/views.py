@@ -57,6 +57,10 @@ class GetItemDetail(views.APIView):
                 ret = response.Response(serializers.EntrySerializer(entry).data)
             except entries.Entry.DoesNotExist:
                 pass
+            except DBProxy.CompanyConfigurationError as cce:
+                except_str = getattr(cce, 'message', repr(cce))
+                ret = response.Response({'message': except_str},
+                                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             except Exception as e:
                 except_str = getattr(e, 'message', repr(e))
                 ret = response.Response({'message': except_str},
