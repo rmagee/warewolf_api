@@ -31,8 +31,9 @@
 import os
 
 from django.core.management.base import BaseCommand
+from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
-
+from warewolf_api.tests import factories
 from quartet_output.parsing import BusinessEPCISParser
 
 
@@ -43,6 +44,43 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print('***************************************************')
+        try:
+            factories.CompanyFactory()
+        except IntegrityError:
+            print('Company was already configured...')
+        try:
+            factories.CompanyTypeFactory()
+        except IntegrityError:
+            print('Company type was already configured...')
+        try:
+            factories.LocationFactory()
+        except IntegrityError:
+            print('Location was already configured...')
+        try:
+            factories.LocationTypeFactory()
+        except IntegrityError:
+            print('LocationType was already configured...')
+        try:
+            factories.LocationFieldFactory()
+        except IntegrityError:
+            print('LocationField was already configured...')
+        try:
+            factories.LocationIdentifierFactory()
+        except IntegrityError:
+            print('LocationIdentifier was already configured...')
+        try:
+            factories.TransactionFactory()
+        except IntegrityError:
+            print('Transaction was already configured...')
+        try:
+            factories.UserFactory()
+        except IntegrityError:
+            print('User was already configured...')
+        try:
+            factories.UserTransactionFactory()
+        except IntegrityError:
+            print('UserTransaction was already configured...')
+
         try:
             self._parse_test_data()
         except Exception as e:

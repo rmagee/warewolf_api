@@ -30,6 +30,14 @@ class EntrySerializer(serializers.ModelSerializer):
         slug_field='identifier',
         label='Top EPC'
     )
+    lot_number = serializers.SerializerMethodField()
+    expiration_date = serializers.SerializerMethodField()
+
+    def get_lot_number(self, entry):
+        return entry.ilmd.get('lotNumber')
+
+    def get_expiration_date(self, entry):
+        return entry.ilmd.get('itemExpirationDate')
 
     class Meta:
         model = entries.Entry

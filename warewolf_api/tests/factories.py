@@ -130,7 +130,7 @@ class TransactionFactory(factory.django.DjangoModelFactory):
         model = Transaction
 
     name = 'Simple Shipping'
-    icon = 'Check'
+    icon = 'icofont-truck-loaded'
     default_ship_from = LocationFactory()
     print(
         '**************  creating the second location...'

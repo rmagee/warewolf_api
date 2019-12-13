@@ -6,6 +6,6 @@ router = routers.DefaultRouter()
 router.register(
     r'transactions',
     viewsets.TransactionViewSet,
-    base_name='transactions'
+    basename='transactions'
 )
 

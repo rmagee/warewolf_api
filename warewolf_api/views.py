@@ -1,9 +1,11 @@
 from rest_framework import views, response, status
-
+from copy import copy
 from gs123.conversion import BarcodeConverter
 from gs123.regex import match_pattern
 from quartet_epcis.models import entries
 from quartet_masterdata.db import DBProxy
+from quartet_epcis.db_api.queries import EPCISDBProxy
+from quartet_masterdata.models import TradeItem
 from warewolf_api import serializers
 
 
@@ -32,6 +34,7 @@ class GetItemDetail(views.APIView):
         else:
             try:
                 epc = None
+                lot = None
                 if barcode.startswith('urn'):
                     epc = barcode
                 else:
@@ -41,8 +44,21 @@ class GetItemDetail(views.APIView):
                         groupdict = match.groupdict()
                         base_id = groupdict.get('gtin14') or groupdict.get(
                             'sscc18')
+                        lot = groupdict.get('lot')
                         cpl = db_proxy.get_company_prefix_length(base_id)
                         epc = BarcodeConverter(barcode, cpl).epc_urn
+                    else:
+                        # SSCCs will always match above so we only need to
+                        # check for oddly formatted GTINs
+                        if barcode.startswith('01'):
+                            gtin14 = barcode[2:16]
+                            cpl = DBProxy().get_company_prefix_length(gtin14)
+                            snl = TradeItem.objects.get(
+                                GTIN14=gtin14).serial_number_length
+                            epc = BarcodeConverter(barcode,
+                                                   company_prefix_length=cpl,
+                                                   serial_number_length=snl)
+
                 entry = entries.Entry.objects.select_related('parent_id',
                                                              'top_id',
                                                              'last_event',
@@ -54,9 +70,27 @@ class GetItemDetail(views.APIView):
                 ).get(
                     identifier=epc
                 )
-                ret = response.Response(serializers.EntrySerializer(entry).data)
+                vals = {}
+                if entry:
+                    events = EPCISDBProxy().get_object_events_by_epcs(
+                        [entry.identifier], select_for_update=False)
+                    for event in events:
+                        if len(event.ilmd) > 0:
+                            vals.update({i.name: i.value for i in event.ilmd})
+                entry.ilmd = vals
+                data = serializers.EntrySerializer(entry)
+                ret = response.Response(data.data)
+
             except entries.Entry.DoesNotExist:
                 pass
+            except TradeItem.DoesNotExist:
+                ret = response.Response(
+                    {'message':
+                         'The GTIN/TradeItem for that barcode could not be '
+                         'located or it does not have a company and/or '
+                         'serial number length defined.',
+                     }, status=status.HTTP_400_BAD_REQUEST
+                )
             except DBProxy.CompanyConfigurationError as cce:
                 except_str = getattr(cce, 'message', repr(cce))
                 ret = response.Response({'message': except_str},

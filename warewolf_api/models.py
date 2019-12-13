@@ -44,7 +44,8 @@ class Transaction(EPCISBusinessEvent):
         help_text=_("The type of EPCIS event to create."),
         null=False,
         blank=False,
-        default='OBJECT'
+        default='OBJECT',
+        choices=EVENT_TYPE_CHOICES
     )
     name = models.CharField(
         max_length=200,
