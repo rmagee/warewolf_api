@@ -1,12 +1,70 @@
 from rest_framework import views, response, status
-from copy import copy
+from rest_framework import exceptions
+from io import StringIO, BytesIO
 from gs123.conversion import BarcodeConverter
 from gs123.regex import match_pattern
+from EPCPyYes.core.v1_2.template_events import ObjectEvent, EPCISDocument
+from EPCPyYes.core.v1_2.CBV import business_steps, dispositions
+from EPCPyYes.core.v1_2.events import Action
 from quartet_epcis.models import entries
+from quartet_epcis.parsing.context_parser import BusinessEPCISParser
 from quartet_masterdata.db import DBProxy
 from quartet_epcis.db_api.queries import EPCISDBProxy
 from quartet_masterdata.models import TradeItem
 from warewolf_api import serializers
+
+
+class DeleteParentByChild(views.APIView):
+    queryset = entries.Entry.objects.none()
+
+    def get(self, request, child_urn=None):
+        """
+        Will attempt to delete (decommission) a parent and then free
+        up all of the children of that parent for use.
+        :param request: The request
+        :param child_urn: The parent URN in question.
+        :return: 200 if successful, 404 if the urn could not be found or 500
+        if there were no children or the item was not a parent, etc.
+        """
+        if child_urn is None:
+            raise exceptions.APIException(
+                'No parent URN provided.',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            parent = entries.Entry.objects.get(identifier=child_urn).parent_id
+            if parent.parent_id is not None:
+                raise exceptions.APIException('The parent of the URN provided '
+                                              'has a parent.  Please free up '
+                                              'that hierarchy first.')
+            items = EPCISDBProxy().get_entries_by_parent(
+                parent,
+                select_for_update=False
+            )
+            items.update(parent_id = None, top_id=None)
+            self.execute_decommission_event(parent)
+            return response.Response(status=status.HTTP_200_OK)
+        except entries.Entry.DoesNotExist:
+            raise exceptions.APIException(
+                'The URN provided could not be found in the system.',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+
+    def execute_decommission_event(self, parent: entries.Entry):
+        """
+        Creates an EPCIS event and runs it through the parser.
+        :param parent: The parent to decommission
+        :return: None
+        """
+        oevent = ObjectEvent(
+            epc_list=[parent.identifier],
+            biz_step=business_steps.BusinessSteps.decommissioning.value,
+            action=Action.delete.value,
+            disposition=dispositions.Disposition.destroyed.value
+        )
+        doc = EPCISDocument(object_events=[oevent])
+        parser = BusinessEPCISParser(BytesIO(doc.render().encode()))
+        parser.parse()
 
 
 class GetItemDetail(views.APIView):

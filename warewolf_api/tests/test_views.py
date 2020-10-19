@@ -13,6 +13,7 @@ from django.contrib.auth import get_user_model
 from quartet_epcis.parsing.business_parser import BusinessEPCISParser
 from quartet_masterdata.models import TradeItem, Company
 from django.urls import reverse
+from quartet_epcis.models.entries import Entry
 
 from warewolf_api import models
 
@@ -68,6 +69,21 @@ class TestWarewolf_api(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('Could not find', response.data['message'])
         print(response.data)
+
+    def test_decommission_children(self):
+        self._parse_test_data()
+        url = reverse('decommission-parent',
+                      kwargs={'child_urn': 'urn:epc:id:sgtin:077722.0011210.11X8KN3H4W'}
+                      )
+        parent = 'urn:epc:id:sgtin:077722.0011210.12CW68RW6G'
+        children = Entry.objects.filter(parent_id__identifier='urn:epc:id:sgtin:077722.0011210.12CW68RW6G')
+        self.assertEqual(children.count(), 18)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        children = Entry.objects.filter(
+        parent_id__identifier='urn:epc:id:sgtin:077722.0011210.12CW68RW6G')
+        self.assertEqual(children.count(), 0)
+
 
     def tearDown(self):
         pass

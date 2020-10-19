@@ -62,3 +62,11 @@ Does the code actually work?
     (myenv) $ pip install tox
     (myenv) $ tox
 
+Setting Up Robot Tests
+----------------------
+
+If you have the Robot Framework Tests, you will need to upload the
+epcis document in the tests/data directory and then configure a company
+with the company prefix of 077722.  In addition, you should create a user
+with the name testuser and a password of testpassword for the tests to run
+without having to be modified.

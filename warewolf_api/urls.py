@@ -11,8 +11,12 @@ urlpatterns = [
         name='item-detail'),
     url(r'^item-detail/?$',
         views.GetItemDetail.as_view(),
-        name='item-detail')
-    ]
-
+        name='item-detail'),
+    url(
+        #https://regex101.com/r/NQXjc1/1
+        r'^decommission-parent/(?P<child_urn>(urn:epc:id:sscc:|urn:epc:id:sgtin:)([0-9]*).([0-9]*)?.([0-9\S]*))',
+        views.DeleteParentByChild.as_view(),
+        name='decommission-parent'
+        )
+]
 urlpatterns += router.urls
-

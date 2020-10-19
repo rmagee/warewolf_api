@@ -9,6 +9,7 @@ from EPCPyYes.core.v1_2 import CBV
 from quartet_output.models import EndPoint, AuthenticationInfo
 from quartet_epcis.models.abstractmodels import EPCISBusinessEvent
 from quartet_masterdata.models import Location, Company
+from django.utils.timezone import now
 
 EVENT_TYPE_CHOICES = (
     ('OBJECT', 'OBJECT'),
@@ -32,7 +33,7 @@ class Transaction(EPCISBusinessEvent):
         default='Check'
     )
     event_time = models.DateTimeField(
-        default=datetime.datetime.utcnow(),
+        default=now,
         verbose_name=_("Created Date"),
         help_text=_("The date this transaction was initially created."),
         null=False,
