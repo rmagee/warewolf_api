@@ -13,6 +13,11 @@ urlpatterns = [
         views.GetItemDetail.as_view(),
         name='item-detail'),
     url(
+        r'^decommission-parent/?$',
+        views.DeleteParentByChild.as_view(),
+        name='decommission-parent'
+    ),
+    url(
         #https://regex101.com/r/NQXjc1/1
         r'^decommission-parent/(?P<child_urn>(urn:epc:id:sscc:|urn:epc:id:sgtin:)([0-9]*).([0-9]*)?.([0-9\S]*))',
         views.DeleteParentByChild.as_view(),
