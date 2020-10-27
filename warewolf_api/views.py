@@ -14,7 +14,45 @@ from quartet_masterdata.models import TradeItem
 from warewolf_api import serializers
 
 
-class DeleteParentByChild(views.APIView):
+class DecommissionParentByChild(views.APIView):
+    """
+    This API call will allow you first remove all children from a parent level
+    item and then decomission that parent in one call.  Only a top-level parent
+    can be used, for example you can not decommission a case and free all
+    of that case's child entries if that case is still part of a pallet or
+    other higher level hierarchy.
+
+    To invoke issue a GET using the following URL syntax:
+
+        http[s]://[hostname]/warewolf/decommission-parent/[urn value for parent]
+
+    For example:
+
+        https://foobar.io/warewolf/decommission-parent/urn:epc:id:sgtin:077722.0011210.12CW68RW6G
+
+    The API will return:
+
+    * 200 if successful
+    * 400 if the URN value can not be found or was not provided along with the appropriate error message.
+
+    Error responses will contain the error message in a JSON object *detail*
+    attribute or a root/detail XML element depending on the content-type of
+    the request.
+
+    By content type:
+
+    JSON response example:
+
+        {
+        "detail": "The URN provided could not be found in the system."
+        }
+
+    XML response example:
+
+        <root>
+            <detail>The URN provided could not be found in the system.</detail>
+        </root>
+    """
     queryset = entries.Entry.objects.none()
 
     def get(self, request, child_urn=None):
@@ -27,27 +65,26 @@ class DeleteParentByChild(views.APIView):
         if there were no children or the item was not a parent, etc.
         """
         if child_urn is None:
-            raise exceptions.APIException(
-                'No parent URN provided.',
-                code=status.HTTP_400_BAD_REQUEST
+            raise exceptions.ValidationError(
+                'No parent URN provided.'
             )
         try:
             parent = entries.Entry.objects.get(identifier=child_urn).parent_id
             if parent.parent_id is not None:
-                raise exceptions.APIException('The parent of the URN provided '
-                                              'has a parent.  Please free up '
-                                              'that hierarchy first.')
+                raise exceptions.ValidationError(
+                    'The parent of the URN provided '
+                    'has a parent.  Please free up '
+                    'that hierarchy first.')
             items = EPCISDBProxy().get_entries_by_parent(
                 parent,
                 select_for_update=False
             )
-            items.update(parent_id = None, top_id=None)
+            items.update(parent_id=None, top_id=None)
             self.execute_decommission_event(parent)
             return response.Response(status=status.HTTP_200_OK)
         except entries.Entry.DoesNotExist:
-            raise exceptions.APIException(
+            raise exceptions.ParseError(
                 'The URN provided could not be found in the system.',
-                code=status.HTTP_400_BAD_REQUEST
             )
 
     def execute_decommission_event(self, parent: entries.Entry):
